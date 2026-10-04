@@ -4,8 +4,15 @@ from urllib.parse import urlsplit
 
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.core import callback
 
-from .const import CONF_DEVICE_URL, CONF_DEVICE_UUID, DOMAIN
+from .const import (
+    CONF_DEVICE_URL,
+    CONF_DEVICE_UUID,
+    CONF_POLL_INTERVAL,
+    DEFAULT_POLL_INTERVAL,
+    DOMAIN,
+)
 from .discovery import select_service_address
 
 
@@ -73,4 +80,36 @@ class BalenaSoundConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=errors,
+        )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Return the options flow for an existing device entry."""
+        return BalenaSoundOptionsFlow(config_entry)
+
+
+class BalenaSoundOptionsFlow(config_entries.OptionsFlow):
+    """Configure polling behavior for a balenaSound device."""
+
+    def __init__(self, config_entry):
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        """Configure the status polling interval."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_POLL_INTERVAL,
+                        default=self.config_entry.options.get(
+                            CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=1, max=300)),
+                }
+            ),
         )

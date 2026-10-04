@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
+import asyncio
+import json
+import logging
+from typing import Any, Callable
 
 from aiohttp import ClientError, ClientSession
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class BalenaSoundDeviceApiError(Exception):
@@ -45,6 +50,31 @@ class BalenaSoundDeviceApi:
         if playing is not None and not isinstance(playing, bool):
             playing = None
         return {"uuid": self.device_uuid, "online": True, "playing": playing}
+
+    async def async_listen_playback_events(
+        self, callback: Callable[[bool | None], None]
+    ) -> None:
+        """Listen for playback events, reconnecting if push is unavailable."""
+        url = f"{self.base_url}/audio/playback/events"
+        while True:
+            try:
+                async with self._session.get(url, timeout=None) as response:
+                    response.raise_for_status()
+                    async for line in response.content:
+                        if not line.startswith(b"data:"):
+                            continue
+                        try:
+                            payload = json.loads(line[5:].strip())
+                        except (json.JSONDecodeError, UnicodeDecodeError):
+                            continue
+                        playing = payload.get("playing") if isinstance(payload, dict) else None
+                        if playing is None or isinstance(playing, bool):
+                            callback(playing)
+            except asyncio.CancelledError:
+                raise
+            except (ClientError, TimeoutError, ValueError, OSError) as err:
+                _LOGGER.debug("Playback event stream disconnected: %s", err)
+            await asyncio.sleep(5)
 
     async def async_reboot(self) -> None:
         """Request a local device reboot."""

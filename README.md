@@ -14,7 +14,7 @@ For each device, it provides connectivity and playback sensors, a status sensor,
 
 Alternatively, copy `custom_components/balena_cloud` into `<config>/custom_components/` and restart Home Assistant.
 
-If mDNS does not cross your network/VLAN boundary, manually add the integration and enter the balena device UUID and its local Supervisor URL (usually port `80`), for example `http://192.168.1.42:80`. The address must be reachable from Home Assistant. The balenaSound release must advertise `_balenasound._tcp.local.` and expose `/ping`, `/audio/playback`, `/device/reboot`, and `/device/restart`.
+If mDNS does not cross your network/VLAN boundary, manually add the integration and enter the balena device UUID and its local Supervisor URL (usually port `80`), for example `http://192.168.1.42:80`. The address must be reachable from Home Assistant. The balenaSound release must advertise `_balenasound._tcp.local.` and expose `/ping`, `/audio/playback`, `/audio/playback/events` (SSE push), `/device/reboot`, and `/device/restart`. Older releases without the event stream still update using polling.
 
 ## Entities
 
@@ -26,7 +26,7 @@ Each discovered device has:
 - `button.*_reboot_device`
 - `button.*_restart_application`
 
-Reboot and restart act immediately and may make a device temporarily unavailable. Playback remains unknown until the Supervisor observes a `play` or `stop` event. The playback sensor reflects active sinks, not track/source metadata.
+Reboot and restart act immediately and may make a device temporarily unavailable. Playback changes are pushed from the Supervisor over a local Server-Sent Events stream; Home Assistant reconnects automatically if the stream is interrupted. Connectivity (and playback on older Supervisor releases without SSE) is checked every 5 seconds by default. Change the fallback/check interval in the integration's **Configure** options (1–300 seconds). Playback remains unknown until the Supervisor observes a `play` or `stop` event. The playback sensor reflects active sinks, not track/source metadata.
 
 ## Upgrade note
 

@@ -1,4 +1,15 @@
 {
+  "options": {
+    "step": {
+      "init": {
+        "title": "Polling interval",
+        "description": "How often to check device connectivity and provide a playback fallback for older Supervisor releases. Playback changes are pushed when the Supervisor supports events.",
+        "data": {
+          "poll_interval": "Polling interval (seconds)"
+        }
+      }
+    }
+  },
   "config": {
     "step": {
       "user": {

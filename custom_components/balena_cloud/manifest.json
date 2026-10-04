@@ -6,8 +6,8 @@
   "dependencies": ["zeroconf"],
   "documentation": "https://github.com/dinpin/ha-balenasound-fleet",
   "issue_tracker": "https://github.com/dinpin/ha-balenasound-fleet/issues",
-  "iot_class": "local_polling",
+  "iot_class": "local_push",
   "requirements": [],
   "zeroconf": [{"type": "_balenasound._tcp.local."}],
-  "version": "0.1.2"
+  "version": "0.1.4"
 }

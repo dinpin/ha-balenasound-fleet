@@ -1,5 +1,6 @@
 """Tests for local balenaSound API access and mDNS address selection."""
 
+import asyncio
 import importlib
 import sys
 import types
@@ -57,6 +58,22 @@ class BalenaSoundDiscoveryTests(unittest.TestCase):
 
     def test_returns_none_when_no_addresses_are_available(self):
         self.assertIsNone(select_service_address({}, []))
+
+
+class AsyncLineContent:
+    """Async iterator for mocked SSE response lines."""
+
+    def __init__(self, lines):
+        self._lines = iter(lines)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        try:
+            return next(self._lines)
+        except StopIteration:
+            raise asyncio.CancelledError
 
 
 class BalenaSoundDeviceApiTests(unittest.IsolatedAsyncioTestCase):
@@ -122,6 +139,28 @@ class BalenaSoundDeviceApiTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             await api.async_get_status(),
             {"uuid": "device-a", "online": True, "playing": None},
+        )
+
+    async def test_playback_event_stream_updates_callback(self):
+        session = MagicMock()
+        response = MagicMock()
+        response.raise_for_status = MagicMock()
+        response.content = AsyncLineContent(
+            [b'data: {"playing": true}', b'data: {"playing": false}']
+        )
+        context = MagicMock()
+        context.__aenter__ = AsyncMock(return_value=response)
+        context.__aexit__ = AsyncMock(return_value=None)
+        session.get.return_value = context
+        api = BalenaSoundDeviceApi(session, "http://192.168.1.2", "device-a")
+        updates = []
+
+        with self.assertRaises(asyncio.CancelledError):
+            await api.async_listen_playback_events(updates.append)
+
+        self.assertEqual(updates, [True, False])
+        session.get.assert_called_once_with(
+            "http://192.168.1.2/audio/playback/events", timeout=None
         )
 
     async def test_reboot_posts_to_local_supervisor(self):
