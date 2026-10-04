@@ -19,6 +19,9 @@ if "aiohttp" not in sys.modules:
     aiohttp.ClientSession = type("ClientSession", (), {})
     sys.modules["aiohttp"] = aiohttp
 BalenaCloudApi = importlib.import_module(f"{package_name}.api").BalenaCloudApi
+select_service_address = importlib.import_module(
+    f"{package_name}.discovery"
+).select_service_address
 
 
 def response_context(payload=None):
@@ -30,6 +33,26 @@ def response_context(payload=None):
     context.__aenter__ = AsyncMock(return_value=response)
     context.__aexit__ = AsyncMock(return_value=None)
     return context
+
+class BalenaSoundDiscoveryTests(unittest.TestCase):
+    """Verify mDNS address selection avoids Docker bridge addresses."""
+
+    def test_prefers_advertised_device_interface_address(self):
+        address = select_service_address(
+            {"ip_address": "192.168.1.25"}, ["172.18.0.1", "192.168.1.25"]
+        )
+
+        self.assertEqual(address, "192.168.1.25")
+
+    def test_falls_back_to_ipv4_for_older_advertisements(self):
+        address = select_service_address({}, ["fe80::1", "172.18.0.1"])
+
+        self.assertEqual(address, "172.18.0.1")
+
+    def test_returns_none_when_no_addresses_are_available(self):
+        self.assertIsNone(select_service_address({}, []))
+
+
 
 
 class BalenaCloudApiLocalTests(unittest.IsolatedAsyncioTestCase):

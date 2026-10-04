@@ -18,6 +18,7 @@ from .const import (
     SCAN_INTERVAL,
     ZEROCONF_SERVICE_TYPE,
 )
+from .discovery import select_service_address
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -69,11 +70,10 @@ class BalenaSoundServiceListener:
             return
 
         addresses = info.parsed_addresses()
-        if not addresses:
+        address = select_service_address(properties, addresses)
+        if not address:
             _LOGGER.debug("balenaSound service %s has no usable addresses", name)
             return
-        # Home Assistant may be on an IPv4-only LAN even when mDNS lists IPv6 first.
-        address = next((item for item in addresses if ":" not in item), addresses[0])
         if ":" in address:
             address = f"[{address}]"
         url = f"http://{address}:{info.port}"
