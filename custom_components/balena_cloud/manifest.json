@@ -3,6 +3,7 @@
   "name": "balenaSound Fleet Monitor",
   "codeowners": ["@dinpin"],
   "config_flow": true,
+  "dependencies": ["zeroconf"],
   "documentation": "https://github.com/dinpin/ha-balenasound-fleet",
   "issue_tracker": "https://github.com/dinpin/ha-balenasound-fleet/issues",
   "iot_class": "cloud_polling",

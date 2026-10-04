@@ -1,6 +1,6 @@
 # balenaSound Fleet Monitor for Home Assistant
 
-A Home Assistant integration for monitoring **balenaSound playback and device health** across a balenaCloud fleet. It uses balenaCloud only to find fleet devices and read their status; optional per-device LAN URLs enable playback monitoring and direct supervisor actions. This is not a general-purpose balenaCloud fleet-management integration.
+A Home Assistant integration for monitoring **balenaSound playback and device health** across a balenaCloud fleet. It uses balenaCloud to find fleet devices and read their status, and mDNS to discover balenaSound devices on the local network. Manual per-device LAN URLs remain available as overrides. This is not a general-purpose balenaCloud fleet-management integration.
 
 - Connectivity and playback binary sensors, plus a status sensor, for each device.
 - Reboot and application-restart buttons. When a local URL is configured, these use the device's local supervisor API; otherwise, they use the balenaCloud Supervisor proxy.
@@ -17,14 +17,14 @@ It does **not** identify the audio source or track, change volume or mode, deplo
 
 HACS can install updates for this repository after it is added as a custom repository. Alternatively, install manually by copying `custom_components/balena_cloud` into `<config>/custom_components/` and restarting Home Assistant.
 
-Enter a balenaCloud API key and the numeric application/fleet ID. To enable LAN playback and local actions, also provide one mapping per device, using its exact balena UUID and the base URL for its supervisor HTTP API (usually port `80`):
+Enter a balenaCloud API key and the numeric application/fleet ID. balenaSound devices advertise their supervisor API address over mDNS, which enables LAN playback monitoring and local actions automatically when Home Assistant and the devices share an mDNS-reachable network. Manual URLs are optional overrides; provide one mapping per device using its exact balena UUID and the base URL for its supervisor HTTP API (usually port `80`):
 
 ```text
 <device-uuid>=http://192.168.1.42:80
 <another-device-uuid>=http://192.168.1.43:80
 ```
 
-The URL must be reachable from Home Assistant. Leave it blank for cloud-only operation. balenaCloud credentials are sent only to `api.balena-cloud.com`; local requests use the configured device URLs.
+The URL must be reachable from Home Assistant. Leave it blank to rely on mDNS discovery or for cloud-only operation. mDNS generally does not cross VLANs or routers; add a manual URL if multicast discovery is unavailable. balenaCloud credentials are sent only to `api.balena-cloud.com`; local requests use discovered addresses or configured overrides.
 
 ## Entities and actions
 
@@ -43,7 +43,7 @@ The buttons take effect immediately. Restart/reboot may make the device temporar
 - Entities are initially created for devices present during setup. Reload the config entry or restart Home Assistant to add devices provisioned later.
 - API response field availability and release metadata depend on the balenaCloud API response and user permissions.
 - Release deployment is deliberately omitted; the prototype does not change a device's desired release.
-- Playback is read from each configured device's local `/audio/playback` endpoint. Devices must run a release exposing that endpoint. Playback remains unknown until the supervisor observes a `play` or `stop` event, and reflects active PulseAudio sinks rather than the selected source or track metadata.
+- Playback is read from each discovered or manually configured device's local `/audio/playback` endpoint. Devices must run a release that advertises `_balenasound._tcp.local.` and exposes that endpoint. Playback remains unknown until the supervisor observes a `play` or `stop` event, and reflects active PulseAudio sinks rather than the selected source or track metadata.
 - Local reboot/restart requests require a configured, reachable URL. A local request failure is reported to Home Assistant; it does not silently fall back to cloud control. Devices without a URL use the cloud proxy.
 - Home Assistant's built-in Snapcast integration remains useful for multiroom player/group control, but is independent of this fleet integration.
 

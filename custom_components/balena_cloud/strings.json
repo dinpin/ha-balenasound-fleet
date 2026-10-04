@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Set up balenaSound Fleet Monitor",
-        "description": "Monitor balenaSound playback and device status. A balenaCloud API key and fleet/application ID discover devices. Optionally add LAN URLs (one UUID=http://address:port per line) to read playback and send reboot/restart actions directly to each device.",
+        "description": "Monitor balenaSound playback and device status. A balenaCloud API key and fleet/application ID discover fleet devices. Devices on an mDNS-reachable LAN are discovered automatically; optionally add LAN URLs (one UUID=http://address:port per line) as overrides for playback and direct reboot/restart actions.",
         "data": {
           "api_token": "balenaCloud API key (for fleet/device status)",
           "app_id": "balenaSound fleet/application ID",

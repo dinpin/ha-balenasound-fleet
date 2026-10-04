@@ -24,7 +24,21 @@ class BalenaCloudApi:
         self._session = session
         self._token = token
         self.app_id = app_id
-        self._local_device_urls = self._parse_local_device_urls(local_device_urls)
+        self._manual_device_urls = self._parse_local_device_urls(local_device_urls)
+        self._discovered_device_urls: dict[str, str] = {}
+
+    def set_discovered_device_url(self, uuid: str, url: str) -> None:
+        """Set a LAN URL learned from a balenaSound mDNS advertisement."""
+        self._discovered_device_urls[uuid] = url.rstrip("/")
+
+    def remove_discovered_device_url(self, uuid: str, url: str) -> None:
+        """Remove a discovered URL only if it still matches the advertisement."""
+        if self._discovered_device_urls.get(uuid) == url.rstrip("/"):
+            self._discovered_device_urls.pop(uuid, None)
+
+    def _local_device_url(self, uuid: str) -> str | None:
+        """Prefer user-configured URLs over addresses learned with mDNS."""
+        return self._manual_device_urls.get(uuid) or self._discovered_device_urls.get(uuid)
 
     @staticmethod
     def _parse_local_device_urls(value: str) -> dict[str, str]:
@@ -90,7 +104,7 @@ class BalenaCloudApi:
     async def _update_local_playback(self, devices: dict[str, dict[str, Any]]) -> None:
         """Read playback state directly from configured devices on the LAN."""
         async def read_playback(uuid: str, device: dict[str, Any]) -> None:
-            url = self._local_device_urls.get(uuid)
+            url = self._local_device_url(uuid)
             if not url:
                 return
             try:
@@ -110,7 +124,7 @@ class BalenaCloudApi:
 
     async def _local_post(self, uuid: str, path: str) -> bool:
         """Post an action to a device's local supervisor, if configured."""
-        url = self._local_device_urls.get(uuid)
+        url = self._local_device_url(uuid)
         if not url:
             return False
         try:

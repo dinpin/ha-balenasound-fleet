@@ -88,6 +88,29 @@ class BalenaCloudApiLocalTests(unittest.IsolatedAsyncioTestCase):
             "POST", "/supervisor/v1/reboot", json={"uuid": "device-a"}
         )
 
+    def test_discovered_url_used_when_no_manual_url_exists(self):
+        api = BalenaCloudApi(None, "token", "42")
+        api.set_discovered_device_url("device-a", "http://192.168.1.2:80/")
+
+        self.assertEqual(api._local_device_url("device-a"), "http://192.168.1.2:80")
+
+    def test_manual_url_overrides_discovered_url(self):
+        api = BalenaCloudApi(
+            None, "token", "42", "device-a=http://192.168.1.3:80"
+        )
+        api.set_discovered_device_url("device-a", "http://192.168.1.2:80")
+
+        self.assertEqual(api._local_device_url("device-a"), "http://192.168.1.3:80")
+
+    def test_removing_stale_discovery_does_not_remove_new_url(self):
+        api = BalenaCloudApi(None, "token", "42")
+        api.set_discovered_device_url("device-a", "http://192.168.1.2:80")
+        api.set_discovered_device_url("device-a", "http://192.168.1.3:80")
+
+        api.remove_discovered_device_url("device-a", "http://192.168.1.2:80")
+
+        self.assertEqual(api._local_device_url("device-a"), "http://192.168.1.3:80")
+
     def test_rejects_invalid_local_mapping(self):
         with self.assertRaises(ValueError):
             BalenaCloudApi(None, "token", "42", "device-a=192.168.1.2")
