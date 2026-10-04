@@ -70,8 +70,10 @@ class BalenaSoundServiceListener:
 
         addresses = info.parsed_addresses()
         if not addresses:
+            _LOGGER.debug("balenaSound service %s has no usable addresses", name)
             return
-        address = addresses[0]
+        # Home Assistant may be on an IPv4-only LAN even when mDNS lists IPv6 first.
+        address = next((item for item in addresses if ":" not in item), addresses[0])
         if ":" in address:
             address = f"[{address}]"
         url = f"http://{address}:{info.port}"
@@ -80,6 +82,7 @@ class BalenaSoundServiceListener:
             self.api.remove_discovered_device_url(*previous)
         self.services[name] = (uuid, url)
         self.api.set_discovered_device_url(uuid, url)
+        _LOGGER.info("Discovered balenaSound device %s at %s", uuid, url)
         self.hass.async_create_task(self.coordinator.async_request_refresh())
 
 

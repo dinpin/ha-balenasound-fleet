@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any
 from urllib.parse import quote, urlsplit
 
 from aiohttp import ClientError, ClientSession
 
 from .const import API_BASE
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class BalenaCloudApiError(Exception):
@@ -114,8 +118,14 @@ class BalenaCloudApi:
                 playing = payload.get("playing") if isinstance(payload, dict) else None
                 if playing is None or isinstance(playing, bool):
                     device["balena_sound_playing"] = playing
-            except (ClientError, TimeoutError, ValueError):
+            except (ClientError, TimeoutError, ValueError) as err:
                 # A failed LAN request leaves playback unknown without failing fleet refresh.
+                _LOGGER.warning(
+                    "Could not read playback for balenaSound device %s from %s: %s",
+                    uuid,
+                    url,
+                    err,
+                )
                 return
 
         await asyncio.gather(
