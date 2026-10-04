@@ -1,4 +1,4 @@
-"""Config flow for balenaCloud."""
+"""Config flow for the balenaSound fleet monitor."""
 
 import voluptuous as vol
 from homeassistant import config_entries
@@ -9,12 +9,12 @@ from .const import CONF_API_TOKEN, CONF_APP_ID, CONF_LOCAL_DEVICE_URLS, DOMAIN
 
 
 class BalenaCloudConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Configure a balenaCloud fleet using an API key and application ID."""
+    """Configure a balenaSound fleet using balenaCloud and optional LAN access."""
 
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
-        """Validate credentials and create the fleet entry."""
+        """Validate credentials and create a balenaSound monitoring entry."""
         errors = {}
         if user_input is not None:
             token = user_input[CONF_API_TOKEN].strip()
@@ -31,7 +31,7 @@ class BalenaCloudConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "cannot_connect"
             else:
                 return self.async_create_entry(
-                    title=f"balenaCloud fleet {app_id}",
+                    title=f"balenaSound fleet {app_id}",
                     data={
                         CONF_API_TOKEN: token,
                         CONF_APP_ID: app_id,

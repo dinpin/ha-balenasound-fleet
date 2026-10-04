@@ -1,6 +1,6 @@
-# balenaCloud Fleet for Home Assistant
+# balenaSound Fleet Monitor for Home Assistant
 
-A custom Home Assistant integration that creates entities for devices in a balenaCloud application. It polls balenaCloud for device inventory and status. Optionally configured local URLs let it poll playback and run device actions directly over the LAN.
+A Home Assistant integration for monitoring **balenaSound playback and device health** across a balenaCloud fleet. It uses balenaCloud only to find fleet devices and read their status; optional per-device LAN URLs enable playback monitoring and direct supervisor actions. This is not a general-purpose balenaCloud fleet-management integration.
 
 - Connectivity and playback binary sensors, plus a status sensor, for each device.
 - Reboot and application-restart buttons. When a local URL is configured, these use the device's local supervisor API; otherwise, they use the balenaCloud Supervisor proxy.
@@ -11,9 +11,9 @@ It does **not** identify the audio source or track, change volume or mode, deplo
 
 1. In Home Assistant, open **HACS → Integrations**.
 2. Open the menu in the upper-right and choose **Custom repositories**.
-3. Add `https://github.com/dinpin/ha-balena-cloud` and select **Integration** as the category.
-4. Find **balenaCloud Fleet** in HACS, download it, and restart Home Assistant.
-5. Open **Settings → Devices & services → Add integration**, then search for **balenaCloud Fleet**.
+3. Add `https://github.com/dinpin/ha-balenasound-fleet` and select **Integration** as the category.
+4. Find **balenaSound Fleet Monitor** in HACS, download it, and restart Home Assistant.
+5. Open **Settings → Devices & services → Add integration**, then search for **balenaSound Fleet Monitor**.
 
 HACS can install updates for this repository after it is added as a custom repository. Alternatively, install manually by copying `custom_components/balena_cloud` into `<config>/custom_components/` and restarting Home Assistant.
 

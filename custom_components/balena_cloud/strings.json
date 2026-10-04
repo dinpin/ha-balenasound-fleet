@@ -2,12 +2,12 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect balenaCloud Fleet",
-        "description": "Use a balenaCloud API key and fleet ID. Optionally enter one LAN address per device as UUID=http://address:port, one per line, for local playback polling and reboot/restart actions.",
+        "title": "Set up balenaSound Fleet Monitor",
+        "description": "Monitor balenaSound playback and device status. A balenaCloud API key and fleet/application ID discover devices. Optionally add LAN URLs (one UUID=http://address:port per line) to read playback and send reboot/restart actions directly to each device.",
         "data": {
-          "api_token": "balenaCloud API key",
-          "app_id": "Fleet/application ID",
-          "local_device_urls": "Local device URLs (optional; UUID=http://address:port per line)"
+          "api_token": "balenaCloud API key (for fleet/device status)",
+          "app_id": "balenaSound fleet/application ID",
+          "local_device_urls": "Device LAN URLs (optional; UUID=http://address:port per line)"
         }
       }
     },

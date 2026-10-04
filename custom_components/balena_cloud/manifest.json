@@ -1,10 +1,10 @@
 {
   "domain": "balena_cloud",
-  "name": "balenaCloud Fleet",
+  "name": "balenaSound Fleet Monitor",
   "codeowners": ["@dinpin"],
   "config_flow": true,
-  "documentation": "https://github.com/dinpin/ha-balena-cloud",
-  "issue_tracker": "https://github.com/dinpin/ha-balena-cloud/issues",
+  "documentation": "https://github.com/dinpin/ha-balenasound-fleet",
+  "issue_tracker": "https://github.com/dinpin/ha-balenasound-fleet/issues",
   "iot_class": "cloud_polling",
   "requirements": [],
   "version": "0.1.0"
