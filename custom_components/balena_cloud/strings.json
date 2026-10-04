@@ -1,0 +1,18 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect balenaCloud Fleet",
+        "description": "Use a balenaCloud API key and fleet ID. Optionally enter one LAN address per device as UUID=http://address:port, one per line, for local playback polling and reboot/restart actions.",
+        "data": {
+          "api_token": "balenaCloud API key",
+          "app_id": "Fleet/application ID",
+          "local_device_urls": "Local device URLs (optional; UUID=http://address:port per line)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not authenticate or read this fleet. Check the API key and fleet ID."
+    }
+  }
+}

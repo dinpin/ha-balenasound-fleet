@@ -1,0 +1,11 @@
+{
+  "domain": "balena_cloud",
+  "name": "balenaCloud Fleet",
+  "codeowners": ["@dinpin"],
+  "config_flow": true,
+  "documentation": "https://github.com/dinpin/ha-balena-cloud",
+  "issue_tracker": "https://github.com/dinpin/ha-balena-cloud/issues",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "0.1.0"
+}
