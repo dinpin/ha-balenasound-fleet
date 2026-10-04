@@ -2,17 +2,19 @@
   "config": {
     "step": {
       "user": {
-        "title": "Set up balenaSound Fleet Monitor",
-        "description": "Monitor balenaSound playback and device status. A balenaCloud API key and fleet/application ID discover fleet devices. Devices on an mDNS-reachable LAN are discovered automatically; optionally add LAN URLs (one UUID=http://address:port per line) as overrides for playback and direct reboot/restart actions.",
+        "title": "Add a balenaSound device",
+        "description": "Add a device by its balena device UUID and local Supervisor URL. Devices advertising balenaSound over mDNS are added automatically when Home Assistant shares their local network.",
         "data": {
-          "api_token": "balenaCloud API key (for fleet/device status)",
-          "app_id": "balenaSound fleet/application ID",
-          "local_device_urls": "Device LAN URLs (optional; UUID=http://address:port per line)"
+          "device_uuid": "Device UUID",
+          "device_url": "Local Supervisor URL (for example http://192.168.1.42:80)"
         }
       }
     },
+    "abort": {
+      "not_balena_sound": "This mDNS service does not identify a balenaSound device."
+    },
     "error": {
-      "cannot_connect": "Could not authenticate or read this fleet. Check the API key and fleet ID."
+      "invalid_device": "Enter a device UUID and a valid local HTTP(S) Supervisor URL."
     }
   }
 }

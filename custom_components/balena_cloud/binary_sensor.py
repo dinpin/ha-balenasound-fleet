@@ -1,4 +1,4 @@
-"""Online sensors for balenaCloud devices."""
+"""Connectivity and playback binary sensors."""
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 
@@ -6,12 +6,14 @@ from .coordinator import BalenaDeviceEntity
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up device online sensors."""
+    """Set up binary sensors for one local device."""
     coordinator = hass.data["balena_cloud"][entry.entry_id]["coordinator"]
+    device_uuid = entry.data["device_uuid"]
     async_add_entities(
-        entity_type(coordinator, uuid)
-        for uuid in coordinator.data
-        for entity_type in (BalenaDeviceOnlineSensor, BalenaDevicePlayingSensor)
+        [
+            BalenaDeviceOnlineSensor(coordinator, device_uuid),
+            BalenaDevicePlayingSensor(coordinator, device_uuid),
+        ]
     )
 
 
@@ -28,7 +30,7 @@ class BalenaDeviceOnlineSensor(BalenaDeviceEntity, BinarySensorEntity):
 
     @property
     def is_on(self):
-        value = self.device.get("is_online")
+        value = self.device.get("online")
         if value is None:
             return None
         return str(value).lower() == "true" if isinstance(value, str) else bool(value)
@@ -48,5 +50,5 @@ class BalenaDevicePlayingSensor(BalenaDeviceEntity, BinarySensorEntity):
     @property
     def is_on(self):
         """Return playback state, or unknown until the device reports it."""
-        return self.device.get("balena_sound_playing")
+        return self.device.get("playing")
 

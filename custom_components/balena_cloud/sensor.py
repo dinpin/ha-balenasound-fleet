@@ -1,4 +1,4 @@
-"""Sensors for balenaCloud devices."""
+"""Sensors for balenaSound devices."""
 
 from homeassistant.components.sensor import SensorEntity
 
@@ -6,15 +6,13 @@ from .coordinator import BalenaDeviceEntity
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up device status sensors."""
+    """Set up the local device status sensor."""
     coordinator = hass.data["balena_cloud"][entry.entry_id]["coordinator"]
-    async_add_entities(
-        BalenaDeviceStatusSensor(coordinator, uuid) for uuid in coordinator.data
-    )
+    async_add_entities([BalenaDeviceStatusSensor(coordinator, entry.data["device_uuid"])])
 
 
 class BalenaDeviceStatusSensor(BalenaDeviceEntity, SensorEntity):
-    """Expose balenaCloud's overall device status."""
+    """Expose local Supervisor connectivity status."""
 
     _attr_has_entity_name = True
     _attr_name = "Status"
@@ -26,14 +24,8 @@ class BalenaDeviceStatusSensor(BalenaDeviceEntity, SensorEntity):
 
     @property
     def native_value(self):
-        return self.device.get("overall_status") or self.device.get("status") or "unknown"
+        return "online" if self.device.get("online") else "offline"
 
     @property
     def extra_state_attributes(self):
-        device = self.device
-        return {
-            "uuid": self.device_uuid,
-            "online": device.get("is_online"),
-            "release_id": device.get("is_running__release"),
-            "balena_status": device.get("status"),
-        }
+        return {"uuid": self.device_uuid}

@@ -1,12 +1,13 @@
 {
   "domain": "balena_cloud",
-  "name": "balenaSound Fleet Monitor",
+  "name": "balenaSound LAN Monitor",
   "codeowners": ["@dinpin"],
   "config_flow": true,
   "dependencies": ["zeroconf"],
   "documentation": "https://github.com/dinpin/ha-balenasound-fleet",
   "issue_tracker": "https://github.com/dinpin/ha-balenasound-fleet/issues",
-  "iot_class": "cloud_polling",
+  "iot_class": "local_polling",
   "requirements": [],
-  "version": "0.1.1"
+  "zeroconf": [{"type": "_balenasound._tcp.local."}],
+  "version": "0.1.2"
 }
