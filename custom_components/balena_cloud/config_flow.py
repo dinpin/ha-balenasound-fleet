@@ -7,13 +7,14 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 
 from .const import (
+    CONF_DEVICE_NAME,
     CONF_DEVICE_URL,
     CONF_DEVICE_UUID,
     CONF_POLL_INTERVAL,
     DEFAULT_POLL_INTERVAL,
     DOMAIN,
 )
-from .discovery import select_service_address
+from .discovery import select_device_name, select_service_address
 
 
 class BalenaSoundConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -37,6 +38,7 @@ class BalenaSoundConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if not isinstance(uuid, str) or not uuid.strip() or not address:
             return self.async_abort(reason="not_balena_sound")
         uuid = uuid.strip()
+        device_name = select_device_name(properties, uuid)
 
         await self.async_set_unique_id(uuid)
         self._abort_if_unique_id_configured()
@@ -44,8 +46,12 @@ class BalenaSoundConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             address = f"[{address}]"
         url = f"http://{address}:{discovery_info.port}"
         return self.async_create_entry(
-            title=f"balenaSound {uuid[:8]}",
-            data={CONF_DEVICE_UUID: uuid, CONF_DEVICE_URL: url},
+            title=device_name,
+            data={
+                CONF_DEVICE_UUID: uuid,
+                CONF_DEVICE_URL: url,
+                CONF_DEVICE_NAME: device_name,
+            },
         )
 
     async def async_step_user(self, user_input=None):
@@ -66,9 +72,14 @@ class BalenaSoundConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 await self.async_set_unique_id(uuid)
                 self._abort_if_unique_id_configured()
+                device_name = select_device_name({}, uuid)
                 return self.async_create_entry(
-                    title=f"balenaSound {uuid[:8]}",
-                    data={CONF_DEVICE_UUID: uuid, CONF_DEVICE_URL: url},
+                    title=device_name,
+                    data={
+                        CONF_DEVICE_UUID: uuid,
+                        CONF_DEVICE_URL: url,
+                        CONF_DEVICE_NAME: device_name,
+                    },
                 )
 
         return self.async_show_form(

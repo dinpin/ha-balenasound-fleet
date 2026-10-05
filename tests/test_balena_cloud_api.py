@@ -22,9 +22,9 @@ if "aiohttp" not in sys.modules:
 BalenaSoundDeviceApi = importlib.import_module(
     f"{package_name}.device_api"
 ).BalenaSoundDeviceApi
-select_service_address = importlib.import_module(
-    f"{package_name}.discovery"
-).select_service_address
+discovery = importlib.import_module(f"{package_name}.discovery")
+select_service_address = discovery.select_service_address
+select_device_name = discovery.select_device_name
 
 
 def response_context(payload=None, content_type="application/json"):
@@ -58,6 +58,19 @@ class BalenaSoundDiscoveryTests(unittest.TestCase):
 
     def test_returns_none_when_no_addresses_are_available(self):
         self.assertIsNone(select_service_address({}, []))
+
+    def test_uses_advertised_device_name(self):
+        self.assertEqual(
+            select_device_name({"device_name": "Living Room"}, "device-uuid"),
+            "Living Room",
+        )
+
+    def test_falls_back_to_uuid_when_name_is_missing_or_blank(self):
+        self.assertEqual(select_device_name({}, "device-uuid"), "balenaSound device-u")
+        self.assertEqual(
+            select_device_name({"device_name": "  "}, "1234567890"),
+            "balenaSound 12345678",
+        )
 
 
 class AsyncLineContent:

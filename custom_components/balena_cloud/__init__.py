@@ -9,6 +9,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
+    CONF_DEVICE_NAME,
     CONF_DEVICE_URL,
     CONF_DEVICE_UUID,
     CONF_POLL_INTERVAL,
@@ -31,7 +32,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     async def async_update_device():
-        return await api.async_get_status()
+        status = await api.async_get_status()
+        status["device_name"] = entry.data.get(
+            CONF_DEVICE_NAME, f"balenaSound {entry.data[CONF_DEVICE_UUID][:8]}"
+        )
+        return status
 
     coordinator = DataUpdateCoordinator(
         hass,

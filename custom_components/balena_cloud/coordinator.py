@@ -20,7 +20,7 @@ class BalenaDeviceEntity(CoordinatorEntity):
     @property
     def device_name(self) -> str:
         """Human-readable device name."""
-        return f"balenaSound {self.device_uuid[:8]}"
+        return self.device.get("device_name", f"balenaSound {self.device_uuid[:8]}")
 
     @property
     def device_info(self):
