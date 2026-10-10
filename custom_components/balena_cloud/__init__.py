@@ -58,13 +58,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     def update_playback(playing):
         """Apply a pushed playback update to coordinator-backed entities."""
+        if coordinator.data is None:
+            return
         coordinator.async_set_updated_data({**coordinator.data, "playing": playing})
 
-    listener_task = hass.async_create_task(
+    # Background tasks tied to the entry are cancelled automatically on unload,
+    # and don't block startup. (Previously `listener_task.cancel` was registered
+    # with async_on_unload; Task.cancel() returns True, which Home Assistant then
+    # tried to schedule as a coroutine -> "a coroutine was expected, got True".)
+    entry.async_create_background_task(
+        hass,
         api.async_listen_playback_events(update_playback),
         f"balenaSound playback listener {entry.data[CONF_DEVICE_UUID][:8]}",
     )
-    entry.async_on_unload(listener_task.cancel)
     return True
 
 
